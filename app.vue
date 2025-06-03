@@ -1,6 +1,24 @@
 <template>
-  <div>
-    <NuxtRouteAnnouncer />
-    <NuxtWelcome />
-  </div>
+  <ion-app>
+    <NuxtPage />
+  </ion-app>
 </template>
+
+<script setup lang="ts">
+import { IonApp } from '@ionic/vue';
+</script>
+
+<style>
+:root {
+  --ion-color-primary: #007aff;
+  --ion-color-primary-rgb: 0, 122, 255;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #006ccc;
+  --ion-color-primary-tint: #1a84ff;
+}
+
+html.ios {
+  --ion-default-font: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Roboto", sans-serif;
+}
+</style>
