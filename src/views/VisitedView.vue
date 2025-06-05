@@ -1,29 +1,57 @@
 <template>
-  <div id="visited">
-    <ion-card v-for="item in visited" :key="item.id">
-      <ion-card-header>
-        <div class="card-content">
-          <div class="photo-container">
-            <img v-if="item.photos.length > 0" :src="item.photos[0]" alt="訪問地の写真" />
-            <ion-thumbnail v-else>
-              <ion-icon :icon="locationOutline" size="large"></ion-icon>
-            </ion-thumbnail>
-          </div>
-          <div class="text-content">
-            <ion-card-title>{{ item.location.name }}</ion-card-title>
-            <ion-card-subtitle>{{ item.date }}</ion-card-subtitle>
-          </div>
-        </div>
-      </ion-card-header>
-    </ion-card>
-  </div>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-back-button @click="goBack" text=""></ion-back-button>
+        </ion-buttons>
+        <ion-title>訪問記録</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    
+    <ion-content class="ion-padding">
+      <div id="visited">
+        <ion-card v-for="item in visited" :key="item.id">
+          <ion-card-header>
+            <div class="card-content">
+              <div class="photo-container">
+                <img v-if="item.photos.length > 0" :src="item.photos[0]" alt="訪問地の写真" />
+                <ion-thumbnail v-else>
+                  <ion-icon :icon="locationOutline" size="large"></ion-icon>
+                </ion-thumbnail>
+              </div>
+              <div class="text-content">
+                <ion-card-title>{{ item.location.name }}</ion-card-title>
+                <ion-card-subtitle>{{ item.date }}</ion-card-subtitle>
+              </div>
+            </div>
+          </ion-card-header>
+        </ion-card>
+      </div>
+    </ion-content>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { Visited } from '@/types';
-import { IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonThumbnail, IonIcon } from '@ionic/vue';
+import { 
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButtons,
+  IonBackButton,
+  IonCard, 
+  IonCardHeader, 
+  IonCardSubtitle, 
+  IonCardTitle, 
+  IonThumbnail, 
+  IonIcon 
+} from '@ionic/vue';
 import { locationOutline } from 'ionicons/icons';
+
+const props = defineProps<{
+  returnCallback: () => void;
+}>();
 
 const visited = ref<Visited[]>([
   // テストデータ
@@ -59,6 +87,14 @@ const visited = ref<Visited[]>([
     photos: []
   }
 ]);
+
+const goBack = () => {
+  const navEl = document.querySelector('ion-nav');
+  if (navEl) {
+    props.returnCallback();
+    navEl.pop().catch(err => console.error(err));
+  }
+}
 
 </script>
 
