@@ -36,8 +36,7 @@ import {
   IonContent,
   IonButton,
   IonSearchbar,
-  IonPage,
-  onIonViewDidEnter
+  IonPage
 } from '@ionic/vue';
 import {
   heartOutline,
@@ -55,7 +54,7 @@ const canDismiss = ref(false);
 
 const initMap = async () => {
   const loader = new Loader({
-    apiKey: 'AIzaSyAJnGmiq0cX3KpeDGUXk9DD_-MQJ1EKH84',
+    apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
     version: 'weekly',
   });
 

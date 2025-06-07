@@ -3,6 +3,15 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
   srcDir: 'src/',
+  nitro: {
+    output: {
+        dir: 'dist/',
+        publicDir: 'dist/'
+    },
+    prerender: {
+      autoSubfolderIndex: false
+    }
+  },
   css: [
     '@ionic/vue/css/core.css',
     '@ionic/vue/css/normalize.css',

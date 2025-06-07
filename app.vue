@@ -6,6 +6,16 @@
 
 <script setup lang="ts">
 import { IonApp } from '@ionic/vue';
+import { useAuthStore } from '@/stores/auth'
+import { onMounted } from 'vue'
+
+// アプリケーション起動時に認証状態を初期化
+const authStore = useAuthStore()
+
+// クライアントサイドでのみ実行
+onMounted(() => {
+  authStore.initialize()
+})
 </script>
 
 <style>

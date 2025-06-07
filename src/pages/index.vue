@@ -12,9 +12,6 @@
 import { ref, markRaw } from 'vue'
 import {
   IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonContent,
   IonNav
 } from '@ionic/vue'
