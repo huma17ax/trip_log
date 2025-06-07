@@ -14,7 +14,10 @@
     "@ionic/core": "^8.5.8",
     "@ionic/pwa-elements": "^3.3.0",
     "@ionic/vue": "^8.5.8",
+    "firebase": "^11.9.0",
+    "firebase-tools": "^14.6.0",
     "nuxt": "^3.17.4",
+    "pinia": "^3.0.3",
     "swiper": "^11.2.8",
     "vue": "^3.5.16",
     "vue-router": "^4.5.1"
