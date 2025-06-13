@@ -1,4 +1,5 @@
 <template>
+  <NuxtPwaManifest />
   <ion-app>
     <NuxtPage />
   </ion-app>
