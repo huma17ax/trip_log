@@ -28,7 +28,21 @@
         <div v-if="placeDetail" class="place-detail-container">
           <!-- 場所名と住所 -->
           <div class="place-info">
-            <h2 class="place-title">{{ placeDetail.displayName }}</h2>
+            <div class="place-header">
+              <h2 class="place-title">{{ placeDetail.displayName }}</h2>
+              
+              <!-- ステータスチップ -->
+              <div class="status-chips" v-if="placeDetail.id">
+                <ion-chip color="primary" outline :disabled="!isVisitedLocation">
+                  <ion-icon :icon="locationOutline" style="margin: -4px;"></ion-icon>
+                </ion-chip>
+                <ion-chip color="danger" outline :style="isWishLocation ? { background: 'rgba(197, 0, 16, 0.12)' } : {}" @click="setWishLocation(!isWishLocation)">
+                  <ion-icon :icon="heart" v-if="isWishLocation"></ion-icon>
+                  <ion-icon :icon="heartOutline" v-else></ion-icon>
+                  <ion-label>Wish</ion-label>
+                </ion-chip>
+              </div>
+            </div>
             <p class="place-address">{{ placeDetail.formattedAddress }}</p>
           </div>
           
@@ -75,7 +89,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, markRaw } from 'vue';
+import { ref, onMounted, nextTick, markRaw, computed } from 'vue';
 import {
   IonIcon,
   IonModal,
@@ -87,15 +101,18 @@ import {
   IonItem,
   IonLabel,
   IonSpinner,
+  IonChip,
 } from '@ionic/vue';
 import {
   heartOutline,
+  heart,
   locationOutline,
-  globeOutline
+  globeOutline,
 } from 'ionicons/icons';
 import { Loader } from '@googlemaps/js-api-loader';
 import WishListView from './WishListView.vue';
 import VisitedView from './VisitedView.vue';
+import { useLocationStore } from '@/stores/location';
 
 // モーダル関連
 const isModalOpen = ref(true);
@@ -103,6 +120,9 @@ const modal = ref();
 const searchText = ref('');
 const canDismiss = ref(false);
 const floatingButtonVisible = ref(true);
+
+// Location Store
+const locationStore = useLocationStore();
 
 // Google API関連
 const googleApiLoader = ref<Loader | null>(null);
@@ -117,6 +137,20 @@ const placeAPIRequestId = ref(0);
 let map: google.maps.Map | null = null;
 let marker: google.maps.marker.AdvancedMarkerElement | null = null;
 const imageLoading = ref(true);
+
+// ステータス判定のcomputed
+const isWishLocation = computed(() => {
+  if (!placeDetail.value?.id) return false;
+  const location = locationStore.locations.find(loc => loc.google_place_id === placeDetail.value?.id);
+  return location?.wish || false;
+});
+
+const isVisitedLocation = computed(() => {
+  if (!placeDetail.value?.id) return false;
+  const location = locationStore.locations.find(loc => loc.google_place_id === placeDetail.value?.id);
+  if (!location) return false;
+  return locationStore.visited.some(visit => visit.location_id === location.id);
+});
 
 const initialize = async () => {
   googleApiLoader.value = new Loader({
@@ -244,6 +278,29 @@ const handleSuggestionClick = async (index: number) => {
     map.panTo(place.location);
     map.setZoom(15);
     marker.position = place.location;
+  }
+}
+
+const setWishLocation = (wish: boolean) => {
+  // locationsにgoogle_place_idが一致するlocationが存在する場合、wishを更新
+  // locationsにgoogle_place_idが一致するlocationが存在しない場合、新規作成
+
+  if (!placeDetail.value?.id) return;
+  const location = locationStore.locations.find(loc => loc.google_place_id === placeDetail.value?.id);
+  if (!location) {
+    locationStore.addLocation({
+      name: placeDetail.value?.displayName || '',
+      address: placeDetail.value?.formattedAddress || '',
+      latitude: placeDetail.value?.location?.lat() || 0,
+      longitude: placeDetail.value?.location?.lng() || 0,
+      google_place_id: placeDetail.value?.id,
+      wish: wish,
+      google_place_photo: placeDetail.value?.photos?.[0]?.getURI() || '',
+      google_place_website: placeDetail.value?.websiteURI || '',
+    });
+  } else {
+    location.wish = !location.wish;
+    locationStore.updateLocation(location.id, location);
   }
 }
 
@@ -434,11 +491,20 @@ ion-modal::part(content) {
   padding: 0 8px;
 }
 
+.place-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
 .place-title {
   font-size: 18px;
   font-weight: 600;
   color: var(--ion-color-dark);
-  margin: 0 0 4px 0;
+  margin: 4px 0 0 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .place-address {
@@ -483,5 +549,22 @@ ion-modal::part(content) {
 
 .website-link {
   padding: 0 8px;
+}
+
+.status-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.status-chips ion-chip {
+  margin: 0;
+  font-size: 12px;
+  height: 24px;
+}
+
+.status-chips ion-chip ion-icon {
+  font-size: 14px;
 }
 </style>
