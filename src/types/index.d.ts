@@ -10,7 +10,7 @@ export type Location = {
 export type Event = {
     id: string;
     name: string;
-    location: Location;
+    location_id: string;
     date_from: string;
     date_to: string;
     url: string;
@@ -18,8 +18,8 @@ export type Event = {
 
 export type Visited = {
     id: string;
-    location: Location;
-    events: Event[];
+    location_id: string;
+    event_ids: string[];
     date: string;
     memo: string;
     photos: string[];

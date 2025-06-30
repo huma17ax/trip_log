@@ -34,7 +34,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import type { Location } from '@/types';
 import { 
   IonHeader,
@@ -51,30 +50,14 @@ import {
   IonIcon
 } from '@ionic/vue';
 import { heartOutline } from 'ionicons/icons';
+import { useLocationStore } from '@/stores/location';
 
 const props = defineProps<{
   returnCallback: () => void;
 }>();
 
-const wish_location = ref<Location[]>([
-  // テストデータ
-  {
-    id: '1',
-    name: '東京タワー',
-    address: '東京都千代田区永田町1-7-1',
-    latitude: 35.6585805,
-    longitude: 139.7454329,
-    wish: true
-  },
-  {
-    id: '2',
-    name: '東京スカイツリー',
-    address: '東京都墨田区押上1-1-2',
-    latitude: 35.7100627,
-    longitude: 139.8107005,
-    wish: true
-  }
-]);
+const locationStore = useLocationStore();
+const wish_location: Location[] = locationStore.wishLocations;
 
 const goBack = () => {
   const navEl = document.querySelector('ion-nav');
