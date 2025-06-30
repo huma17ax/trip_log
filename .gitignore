@@ -28,3 +28,6 @@ logs
 firebase-debug.log
 firebase-debug.*.log
 ui-debug.log
+
+# Firebase Emulator data
+.firebase-emulators

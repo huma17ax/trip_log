@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import { getStorage } from "firebase/storage";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getStorage, connectStorageEmulator } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -19,5 +19,16 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
+
+// 開発環境でエミュレーターに接続
+if (process.env.NODE_ENV === 'development') {
+  try {
+    connectFirestoreEmulator(db, 'localhost', 8080);
+    connectAuthEmulator(auth, 'http://localhost:9099');
+    connectStorageEmulator(storage, 'localhost', 9199);
+  } catch (error) {
+    console.warn('Emulator connection failed:', error);
+  }
+}
 
 export { app };

@@ -20,7 +20,7 @@
                 </ion-thumbnail>
               </div>
               <div class="text-content">
-                <ion-card-title>{{ item.location.name }}</ion-card-title>
+                <ion-card-title>{{ getLocation(item.location_id)?.name }}</ion-card-title>
                 <ion-card-subtitle>{{ item.date }}</ion-card-subtitle>
               </div>
             </div>
@@ -31,8 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { Visited } from '@/types';
+import type { Location, Visited } from '@/types';
 import { 
   IonHeader,
   IonToolbar,
@@ -48,45 +47,19 @@ import {
   IonIcon 
 } from '@ionic/vue';
 import { locationOutline } from 'ionicons/icons';
+import { useLocationStore } from '@/stores/location';
 
 const props = defineProps<{
   returnCallback: () => void;
 }>();
 
-const visited = ref<Visited[]>([
-  // テストデータ
-  {
-    id: '1',
-    location: {
-      id: '1',
-      name: '東京タワー',
-      address: '東京都千代田区永田町1-7-1',
-      latitude: 35.6585805,
-      longitude: 139.7454329,
-      wish: false
-    },
-    events: [
-      {
-        id: '1',
-        name: '東京タワー',
-        location: {
-          id: '1',
-          name: '東京タワー',
-          address: '東京都千代田区永田町1-7-1',
-          latitude: 35.6585805,
-          longitude: 139.7454329,
-          wish: false
-        },
-        date_from: '2021-01-01',
-        date_to: '2021-01-01',
-        url: 'https://www.google.com'
-      }
-    ],
-    date: '2021-01-01',
-    memo: 'メモ',
-    photos: []
-  }
-]);
+const locationStore = useLocationStore();
+const visited: Visited[] = locationStore.visited;
+const locations: Location[] = locationStore.locations;
+
+const getLocation = (location_id: string) => {
+  return locations.find(location => location.id === location_id);
+}
 
 const goBack = () => {
   const navEl = document.querySelector('ion-nav');
