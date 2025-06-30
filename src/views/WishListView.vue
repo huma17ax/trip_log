@@ -14,11 +14,8 @@
         <ion-card-header>
           <div class="card-content">
             <div class="photo-container">
-              <!-- <img v-if="item.photos.length > 0" :src="item.photos[0]" alt="訪問地の写真" />
-                <ion-thumbnail v-else>
-                  <ion-icon :icon="locationOutline" size="large"></ion-icon>
-                </ion-thumbnail> -->
-              <ion-thumbnail>
+              <img v-if="item.google_place_photo" :src="item.google_place_photo" alt="訪問地の写真" />
+              <ion-thumbnail v-else>
                 <ion-icon :icon="heartOutline" size="large"></ion-icon>
               </ion-thumbnail>
             </div>
@@ -93,6 +90,14 @@ onBeforeUnmount(() => {
   width: 80px;
   height: 80px;
   flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.photo-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .text-content {

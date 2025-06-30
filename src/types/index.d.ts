@@ -4,6 +4,9 @@ export type Location = {
     address: string;
     latitude: number;
     longitude: number;
+    google_place_id: string;
+    google_place_photo: string;
+    google_place_website: string;
     wish: boolean;
 }
 
