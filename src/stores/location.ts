@@ -49,15 +49,6 @@ export const useLocationStore = defineStore("location", () => {
     
     await Promise.all([subscribeDB(), fetchLocations(), fetchVisited()]);
     initialized.value = true;
-
-    // test
-    addVisited({
-      location_id: 'HXBCAyCH6HdZr8UO2CzJZcFYIIXE',
-      event_ids: [],
-      date: '2021-01-01',
-      memo: 'メモ',
-      photos: []
-    });
   };
 
   const subscribeDB = async () => {
