@@ -1,53 +1,54 @@
 <template>
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-back-button @click="goBack" text=""></ion-back-button>
-        </ion-buttons>
-        <ion-title>ウィッシュリスト</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    
-    <ion-content class="ion-padding">
-      <div id="wishlist">
-        <ion-card v-for="item in wish_location" :key="item.id">
-          <ion-card-header>
-            <div class="card-content">
-              <div class="photo-container">
-                <!-- <img v-if="item.photos.length > 0" :src="item.photos[0]" alt="訪問地の写真" />
+  <ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-back-button @click="goBack" text=""></ion-back-button>
+      </ion-buttons>
+      <ion-title>ウィッシュリスト</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="ion-padding">
+    <div id="wishlist">
+      <ion-card v-for="item in wish_location" :key="item.id">
+        <ion-card-header>
+          <div class="card-content">
+            <div class="photo-container">
+              <!-- <img v-if="item.photos.length > 0" :src="item.photos[0]" alt="訪問地の写真" />
                 <ion-thumbnail v-else>
                   <ion-icon :icon="locationOutline" size="large"></ion-icon>
                 </ion-thumbnail> -->
-                <ion-thumbnail>
-                  <ion-icon :icon="heartOutline" size="large"></ion-icon>
-                </ion-thumbnail>
-              </div>
-              <div class="text-content">
-                <ion-card-title>{{ item.name }}</ion-card-title>
-                <ion-card-subtitle>{{ item.address }}</ion-card-subtitle>
-              </div>
+              <ion-thumbnail>
+                <ion-icon :icon="heartOutline" size="large"></ion-icon>
+              </ion-thumbnail>
             </div>
-          </ion-card-header>
-        </ion-card>
-      </div>
-    </ion-content>
+            <div class="text-content">
+              <ion-card-title>{{ item.name }}</ion-card-title>
+              <ion-card-subtitle>{{ item.address }}</ion-card-subtitle>
+            </div>
+          </div>
+        </ion-card-header>
+      </ion-card>
+    </div>
+  </ion-content>
 </template>
 
 <script setup lang="ts">
 import type { Location } from '@/types';
-import { 
+import { onMounted, onBeforeUnmount, ref } from 'vue';
+import {
   IonHeader,
   IonToolbar,
-  IonTitle, 
+  IonTitle,
   IonContent,
   IonButtons,
   IonBackButton,
-  IonCard, 
-  IonCardHeader, 
-  IonCardSubtitle, 
-  IonCardTitle, 
-  IonThumbnail, 
-  IonIcon
+  IonCard,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonThumbnail,
+  IonIcon,
 } from '@ionic/vue';
 import { heartOutline } from 'ionicons/icons';
 import { useLocationStore } from '@/stores/location';
@@ -58,14 +59,26 @@ const props = defineProps<{
 
 const locationStore = useLocationStore();
 const wish_location: Location[] = locationStore.wishLocations;
+const callbackExecuted = ref(false);
 
 const goBack = () => {
   const navEl = document.querySelector('ion-nav');
   if (navEl) {
-    props.returnCallback();
+    if (!callbackExecuted.value) {
+      props.returnCallback();
+      callbackExecuted.value = true;
+    }
     navEl.pop().catch(err => console.error(err));
   }
 }
+
+// コンポーネントがアンマウントされる際にもコールバックを実行
+onBeforeUnmount(() => {
+  if (!callbackExecuted.value) {
+    props.returnCallback();
+    callbackExecuted.value = true;
+  }
+});
 
 </script>
 

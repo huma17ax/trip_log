@@ -32,6 +32,7 @@
 
 <script setup lang="ts">
 import type { Location, Visited } from '@/types';
+import { onBeforeUnmount, ref } from 'vue';
 import { 
   IonHeader,
   IonToolbar,
@@ -56,6 +57,7 @@ const props = defineProps<{
 const locationStore = useLocationStore();
 const visited: Visited[] = locationStore.visited;
 const locations: Location[] = locationStore.locations;
+const callbackExecuted = ref(false);
 
 const getLocation = (location_id: string) => {
   return locations.find(location => location.id === location_id);
@@ -64,10 +66,21 @@ const getLocation = (location_id: string) => {
 const goBack = () => {
   const navEl = document.querySelector('ion-nav');
   if (navEl) {
-    props.returnCallback();
+    if (!callbackExecuted.value) {
+      props.returnCallback();
+      callbackExecuted.value = true;
+    }
     navEl.pop().catch(err => console.error(err));
   }
 }
+
+// コンポーネントがアンマウントされる際にもコールバックを実行
+onBeforeUnmount(() => {
+  if (!callbackExecuted.value) {
+    props.returnCallback();
+    callbackExecuted.value = true;
+  }
+});
 
 </script>
 
