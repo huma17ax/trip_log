@@ -320,6 +320,10 @@ const handleReturnToMap = () => {
   if (modal.value && modal.value.$el) {
     modal.value.$el.setCurrentBreakpoint(0.2);
   }
+  const navEl = document.querySelector('ion-nav');
+  if (navEl) {
+    navEl.popToRoot().catch(err => console.error(err));
+  }
 };
 
 const navigateTo = (component: any) => {

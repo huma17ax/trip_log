@@ -70,7 +70,7 @@ const goBack = () => {
       props.returnCallback();
       callbackExecuted.value = true;
     }
-    navEl.pop().catch(err => console.error(err));
+    // navEl.pop().catch(err => console.error(err));
   }
 }
 
