@@ -87,7 +87,8 @@ export const useLocationStore = defineStore("location", () => {
   };
 
   const addLocation = async (location: Omit<Location, "id">) => {
-    await addDoc(getUserCollection(LocationCollectionId), location);
+    const docRef = await addDoc(getUserCollection(LocationCollectionId), location);
+    return { id: docRef.id, ...location } as Location;
   };
 
   const updateLocation = async (id: string, updates: Partial<Location>) => {
@@ -107,7 +108,8 @@ export const useLocationStore = defineStore("location", () => {
   };
 
   const addVisited = async (visitedData: Omit<Visited, "id">) => {
-    await addDoc(getUserCollection(VisitedCollectionId), visitedData);
+    const docRef = await addDoc(getUserCollection(VisitedCollectionId), visitedData);
+    return { id: docRef.id, ...visitedData } as Visited;
   };
 
   const updateVisited = async (id: string, updates: Partial<Visited>) => {

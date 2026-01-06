@@ -10,11 +10,20 @@
     
     <ion-content class="ion-padding">
       <div id="visited">
-        <ion-card v-for="item in visited" :key="item.id">
+        <ion-card 
+          v-for="item in visited" 
+          :key="item.id" 
+          @click="navigateTo(item)"
+          @contextmenu.prevent="openActionSheet(item)"
+          @touchstart="startLongPress(item)"
+          @touchend="cancelLongPress"
+          @touchmove="cancelLongPress"
+        >
           <ion-card-header>
             <div class="card-content">
               <div class="photo-container">
                 <img v-if="item.photos.length > 0" :src="item.photos[0]" alt="訪問地の写真" />
+                <img v-else-if="getLocation(item.location_id)?.google_place_photo" :src="getLocation(item.location_id)?.google_place_photo" alt="訪問地の写真" />
                 <ion-thumbnail v-else>
                   <ion-icon :icon="locationOutline" size="large"></ion-icon>
                 </ion-thumbnail>
@@ -27,12 +36,19 @@
           </ion-card-header>
         </ion-card>
       </div>
+
+      <ion-action-sheet
+        :is-open="isActionSheetOpen"
+        :header="selectedVisited ? `${getLocation(selectedVisited.location_id)?.name}＠${selectedVisited.date}` : ''"
+        :buttons="actionSheetButtons"
+        @didDismiss="isActionSheetOpen = false"
+      ></ion-action-sheet>
     </ion-content>
 </template>
 
 <script setup lang="ts">
 import type { Location, Visited } from '@/types';
-import { onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { 
   IonHeader,
   IonToolbar,
@@ -45,23 +61,74 @@ import {
   IonCardSubtitle, 
   IonCardTitle, 
   IonThumbnail, 
-  IonIcon 
+  IonIcon,
+  IonActionSheet
 } from '@ionic/vue';
-import { locationOutline } from 'ionicons/icons';
+import { locationOutline, trashOutline } from 'ionicons/icons';
 import { useLocationStore } from '@/stores/location';
+import VisitedDetailView from './VisitedDetailView.vue';
 
 const props = defineProps<{
   returnCallback: () => void;
 }>();
 
 const locationStore = useLocationStore();
-const visited: Visited[] = locationStore.visited;
-const locations: Location[] = locationStore.locations;
+const visited = computed(() => locationStore.visited);
+const locations = computed(() => locationStore.locations);
 const callbackExecuted = ref(false);
 
+// Action Sheet state
+const isActionSheetOpen = ref(false);
+const selectedVisited = ref<Visited | null>(null);
+let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+
+// Action Sheet buttons configuration
+const actionSheetButtons = [
+  {
+    text: '削除',
+    role: 'destructive',
+    icon: trashOutline,
+    handler: () => {
+      handleDelete();
+    }
+  },
+  {
+    text: 'キャンセル',
+    role: 'cancel'
+  }
+];
+
 const getLocation = (location_id: string) => {
-  return locations.find(location => location.id === location_id);
+  return locations.value.find(location => location.id === location_id);
 }
+
+// Long press handlers for touch devices
+const startLongPress = (item: Visited) => {
+  longPressTimer = setTimeout(() => {
+    openActionSheet(item);
+  }, 500);
+};
+
+const cancelLongPress = () => {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+};
+
+const openActionSheet = (item: Visited) => {
+  cancelLongPress();
+  selectedVisited.value = item;
+  isActionSheetOpen.value = true;
+};
+
+const handleDelete = async () => {
+  if (selectedVisited.value) {
+    const deletedId = selectedVisited.value.id;
+    await locationStore.deleteVisited(deletedId);
+    selectedVisited.value = null;
+  }
+};
 
 const goBack = () => {
   const navEl = document.querySelector('ion-nav');
@@ -71,6 +138,14 @@ const goBack = () => {
       callbackExecuted.value = true;
     }
     // navEl.pop().catch(err => console.error(err));
+  }
+}
+
+const navigateTo = (visited: Visited) => {
+  const navEl = document.querySelector('ion-nav');
+  if (navEl) {
+    const componentInstance = markRaw(VisitedDetailView);
+    navEl.push(componentInstance, { targetVisitedId: visited.id }).catch(err => console.error(err));
   }
 }
 

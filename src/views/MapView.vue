@@ -33,7 +33,7 @@
               
               <!-- ステータスチップ -->
               <div class="status-chips" v-if="placeDetail.id">
-                <ion-chip color="primary" outline :disabled="!isVisitedLocation">
+                <ion-chip color="primary" outline @click="addVisitedLocation">
                   <ion-icon :icon="locationOutline" style="margin: -4px;"></ion-icon>
                 </ion-chip>
                 <ion-chip color="danger" outline :style="isWishLocation ? { background: 'rgba(197, 0, 16, 0.12)' } : {}" @click="setWishLocation(!isWishLocation)">
@@ -112,7 +112,9 @@ import {
 import { Loader } from '@googlemaps/js-api-loader';
 import WishListView from './WishListView.vue';
 import VisitedView from './VisitedView.vue';
+import VisitedDetailView from './VisitedDetailView.vue';
 import { useLocationStore } from '@/stores/location';
+import type { Visited } from '@/types';
 
 // モーダル関連
 const isModalOpen = ref(true);
@@ -281,6 +283,34 @@ const handleSuggestionClick = async (index: number) => {
   }
 }
 
+const addVisitedLocation = async () => {
+  // locationsにgoogle_place_idが一致するlocationが存在しない場合、新規作成
+  if (!placeDetail.value?.id) return;
+  let location = locationStore.locations.find(loc => loc.google_place_id === placeDetail.value?.id);
+  if (!location) {
+    location = await locationStore.addLocation({
+      name: placeDetail.value?.displayName || '',
+      address: placeDetail.value?.formattedAddress || '',
+      latitude: placeDetail.value?.location?.lat() || 0,
+      longitude: placeDetail.value?.location?.lng() || 0,
+      google_place_id: placeDetail.value?.id,
+      wish: false,
+      google_place_photo: placeDetail.value?.photos?.[0]?.getURI() || '',
+      google_place_website: placeDetail.value?.websiteURI || '',
+    });
+  }
+
+  const visited = await locationStore.addVisited({
+    location_id: location?.id || '',
+    event_ids: [],
+    date: new Date().toISOString().split('T')[0],
+    memo: '',
+    photos: [],
+  });
+
+  openNewVisited(visited);
+}
+
 const setWishLocation = (wish: boolean) => {
   // locationsにgoogle_place_idが一致するlocationが存在する場合、wishを更新
   // locationsにgoogle_place_idが一致するlocationが存在しない場合、新規作成
@@ -332,6 +362,15 @@ const navigateTo = (component: any) => {
   if (navEl) {
     const componentInstance = markRaw(component);
     navEl.push(componentInstance, { returnCallback: handleReturnToMap }).catch(err => console.error(err));
+  }
+}
+
+const openNewVisited = (visited: Visited) => {
+  closeModal();
+  const navEl = document.querySelector('ion-nav');
+  if (navEl) {
+    navEl.push(markRaw(VisitedDetailView), { targetVisitedId: visited.id }).catch(err => console.error(err));
+    navEl.insert(1, markRaw(VisitedView), { returnCallback: handleReturnToMap }).catch(err => console.error(err));
   }
 }
 
